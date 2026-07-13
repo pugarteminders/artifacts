@@ -28,7 +28,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .rombo{width:36px;height:36px;background:var(--m-black);transform:rotate(45deg);display:inline-flex;align-items:center;justify-content:center;margin:0 6px}
 .rombo span{transform:rotate(-45deg);font-size:10px;color:var(--m-white)}
 .hero{margin-top:28px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:22px}
 .stat-card{background:#fff;border:1px solid var(--b10);border-radius:18px;padding:16px 18px}
 .stat{font-family:var(--disp);font-weight:900;font-size:clamp(26px,3vw,38px);letter-spacing:-.03em;line-height:1}
 .stat-label{font-size:11px;opacity:.65;margin-top:6px;line-height:1.45}
@@ -218,8 +218,7 @@ const corr=V.filter(d=>CORR.includes(d[9])), rea=V.filter(d=>d[9]==="reactivar")
 const sano=tm>0?1-corr.reduce((s,d)=>s+d[2],0)/tm:0;
 document.getElementById("nchip").textContent=V.length+" cuentas";
 document.getElementById("stats").innerHTML=
-'<div class="stat-card"><div class="stat">'+(m>0?pf(c/m):"—")+'</div><div class="stat-label">costo de horas sobre el margen del trimestre (Q2)'+(terr==="all"?" — nivel compañía":" en "+terr)+'</div></div>'
-+'<div class="stat-card"><div class="stat" style="color:var(--mint-d)">'+pf(sano,0)+'</div><div class="stat-label">del MARR'+(terr==="all"?"":" de "+terr)+' está sano: bien atendido y bien cobrado</div></div>'
+'<div class="stat-card"><div class="stat" style="color:var(--mint-d)">'+pf(sano,0)+'</div><div class="stat-label">del MARR'+(terr==="all"?"":" de "+terr)+' está sano: bien atendido y bien cobrado</div></div>'
 +'<div class="stat-card"><div class="stat" style="color:var(--coral-d)">'+corr.length+'</div><div class="stat-label">cuentas con acción correctiva asignada ('+pf(corr.reduce((s,d)=>s+d[3],0)/(th||1),0)+' de las horas)</div></div>'
 +'<div class="stat-card"><div class="stat" style="color:var(--lav-d)">'+rea.length+'</div><div class="stat-label">cuentas a reactivar: '+pf(rea.reduce((s,d)=>s+d[2],0)/(tm||1))+' del MARR sin contacto en 2 meses</div></div>';
 }
