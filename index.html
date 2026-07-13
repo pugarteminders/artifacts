@@ -91,6 +91,8 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
   <h1 class="h1">La cartera, en<br>nueve decisiones</h1>
 </section>
  
+<section class="stats" id="resumen" style="margin-top:22px"></section>
+ 
 <section class="stats" id="stats"></section>
  
 <div class="filters" id="filters">
@@ -181,6 +183,7 @@ const HD=[["Addi","NOLA","motor",5.44,1.7,"Low",622,52.0,85680.0,"Motor de carte
 const BD=[["Banco General","MAU",102.3,1249.7,"2.0M","2.0M","46K","Sobreconsume en 3 features distintos — vale una conversación de expansión integral, no feature por feature. Motor de cartera (2.68% del MARR). Excede el cupo en 46K MAU · pacing 1250% (proyección a este ritmo) · contrato vence 11/17/2026."],["Cencosud","MAU",466.8,2366.6,"1.8M","8.4M","6.6M","Atención por proceso (0.32% del MARR). Excede el cupo en 6.6M MAU · pacing 2367% (proyección a este ritmo) · contrato vence 10/31/2026."],["Claro Pay","MAU",103.5,1254.7,"1.6M","1.7M","55K","Candidata a upsell (0.74% del MARR). Excede el cupo en 55K MAU · pacing 1255% (proyección a este ritmo) · contrato vence 10/22/2026."],["Puntos Colombia","MAU",149.7,886.7,"750K","1.1M","373K","Motor de cartera (1.02% del MARR). Ojo: el allotment de esta fila parece tener un error de carga (750 en vez de 750,000) — validar antes de usar el número exacto en el deck. Excede el cupo en 373K MAU · pacing 887% (proyección a este ritmo) · contrato vence 01/31/2027."],["Banco General","MUV",117.7,968.1,"500","588","88","Sobreconsume en 3 features distintos — vale una conversación de expansión integral, no feature por feature. Motor de cartera (2.68% del MARR). Excede el cupo en 88 MUV · pacing 968% (proyección a este ritmo) · contrato vence 11/17/2026."],["Casa de Tono","MUV",123.5,696.3,"200","247","47","Atención por proceso (0.29% del MARR). Excede el cupo en 47 MUV · pacing 696% (proyección a este ritmo) · contrato vence 05/26/2026."],["Draftea","mensajes WhatsApp",110.6,56.4,"11.5M","12.7M","1.2M","Sobreconsume en 2 features distintos — vale una conversación de expansión integral, no feature por feature. Atención por proceso (0.59% del MARR). Excede el cupo en 1.2M mensajes WhatsApp · pacing 56% (proyección a este ritmo) · contrato vence 08/09/2026."],["Ueno","mensajes WhatsApp",102.1,101.4,"2.8M","2.9M","58K","Sin match en la cartera de servicio (producto separado). Excede el cupo en 58K mensajes WhatsApp · pacing 101% (proyección a este ritmo) · contrato vence 11/20/2026."],["Banco General","datapoints",137.8,167.4,"30.0B","41.3B","11.3B","Sobreconsume en 3 features distintos — vale una conversación de expansión integral, no feature por feature. Motor de cartera (2.68% del MARR). Excede el cupo en 11.3B datapoints · pacing 167% (proyección a este ritmo) · contrato vence 11/17/2026."],["Draftea","emails",192.2,-31.9,"1.5M","2.9M","1.4M","Sobreconsume en 2 features distintos — vale una conversación de expansión integral, no feature por feature. Atención por proceso (0.59% del MARR). Excede el cupo en 1.4M emails · pacing -32% (el ritmo de consumo viene bajando) · contrato vence 08/09/2026."]];
 const RN={C:"Critical",H:"High",M:"Medium",L:"Low"};
 const RC={C:"var(--coral-d)",H:"var(--pink-d)",M:"var(--coral-d)",L:"var(--mint-d)"};
+const TOTM=8932404;
 const col=d=>d[2]>=0.01?2:(d[2]>=0.003?1:0);
 const row=d=>{if(d[9]==="kof")return 0;if(d[8]>=0.2)return 0;if(d[8]<0.05)return d[2]>=0.01?1:2;return 1;};
 const CELLS=[
@@ -197,6 +200,17 @@ const pf=(x,dec)=>(x*100).toFixed(dec===undefined?1:dec)+"%";
 const fmt=n=>"$"+Math.round(n).toLocaleString("en-US");
 let terr="all", tier=0, selCell=null;
 const vis=()=>D.filter(d=>(terr==="all"||d[1]===terr)&&(tier===0||d[15]===tier));
+function resumen(){
+const V=vis();
+const marr=V.reduce((s,d)=>s+d[7],0);
+const hrs=V.reduce((s,d)=>s+d[4],0);
+const costo=V.reduce((s,d)=>s+d[6],0);
+document.getElementById("resumen").innerHTML=
+'<div class="stat-card"><div class="stat">'+V.length+'</div><div class="stat-label">clientes'+(terr==="all"?" activos":" activos en "+terr)+'</div></div>'
++'<div class="stat-card"><div class="stat">'+fmt(marr)+'</div><div class="stat-label">MARR total del período (Q2)</div></div>'
++'<div class="stat-card"><div class="stat">'+Math.round(hrs).toLocaleString("en-US")+'</div><div class="stat-label">horas entregadas en el período</div></div>'
++'<div class="stat-card"><div class="stat">'+(marr>0?pf(costo/marr):"—")+'</div><div class="stat-label">ratio de costo sobre MARR del período</div></div>';
+}
 function stats(){
 const V=vis(), tm=V.reduce((s,d)=>s+d[2],0), th=V.reduce((s,d)=>s+d[3],0);
 const c=V.reduce((s,d)=>s+d[6],0), m=V.reduce((s,d)=>s+d[7],0);
@@ -246,7 +260,7 @@ function ficha(d){
 const V=vis(), tm=V.reduce((s,d)=>s+d[2],0)||1, th=V.reduce((s,d)=>s+d[3],0)||1;
 const f=document.getElementById("ficha"); f.style.display="block";
 f.innerHTML='<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><span class="h3">'+d[0]+'</span><span class="chip" style="font-size:10px;padding:3px 10px">'+d[1]+'</span><span class="chip" style="font-size:10px;padding:3px 10px">'+G[d[9]]+'</span></div>'
-+'<div class="frow"><span>MARR del período: <b>'+fmt(d[7])+'</b></span><span>costo de horas: <b>'+fmt(d[6])+'</b></span><span>ratio: <b>'+(d[8]>=9?"n/d":pf(d[8],0))+'</b></span></div>'
++'<div class="frow"><span>MARR total (anual): <b>'+fmt(d[2]*TOTM)+'</b></span><span>MARR del período: <b>'+fmt(d[7])+'</b></span><span>costo de horas: <b>'+fmt(d[6])+'</b></span><span>ratio: <b>'+(d[8]>=9?"n/d":pf(d[8],0))+'</b></span></div>'
 +'<div class="frow"><span>horas Q2: <b>'+d[4]+'</b></span><span>aporte'+(terr==="all"?" total":" en "+terr)+': <b>'+pf(d[2]/tm)+' MARR · '+pf(d[3]/th)+' horas</b></span></div>'
 +'<div style="margin-top:8px;font-size:12px;opacity:.6">'+ACC[d[9]]+'</div>';
 }
@@ -267,7 +281,6 @@ function hxp(c){return parseInt(c,16);}
 function lerpc(a,b,t){const A=[hxp(a.slice(1,3)),hxp(a.slice(3,5)),hxp(a.slice(5,7))],B=[hxp(b.slice(1,3)),hxp(b.slice(3,5)),hxp(b.slice(5,7))];return '#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('');}
 function semaf(r){if(r<0)return '#888780';if(r>=0.5)return '#E24B4A';if(r>=0.2)return lerpc('#F5C842','#E06D10',(r-0.2)/0.3);if(r>=0.05)return lerpc('#0F6E56','#97C459',(r-0.05)/0.14);return '#378ADD';}
 function bubble(){
-const TOTM=8932404;
 const V=vis().filter(d=>(d[4]+d[5])>0&&d[7]>0);
 const W=1100,Hh=520,Lm=70,Rm=20,Tm=20,Bm=52,PW=W-Lm-Rm,PH=Hh-Tm-Bm,MX=2200,MY=170000;
 const xf=v=>Lm+Math.sqrt(v/MX)*PW, yf=v=>Tm+(1-Math.sqrt(Math.min(v,MY)/MY))*PH;
@@ -378,7 +391,7 @@ r.addEventListener("mousemove",e=>hxTip(e,document.getElementById("bubtip").inne
 r.addEventListener("mouseleave",hxHide);
 });
 }
-function renderAll(){stats();nine();bubble();plan();if(selCell!==null)cellDetail();}
+function renderAll(){resumen();stats();nine();bubble();plan();if(selCell!==null)cellDetail();}
 document.querySelectorAll(".fchip:not(.tchip)").forEach(b=>b.addEventListener("click",()=>{
 document.querySelectorAll(".fchip:not(.tchip)").forEach(x=>x.classList.remove("on"));b.classList.add("on");
 terr=b.dataset.t;renderAll();
