@@ -1,0 +1,484 @@
+
+dame 1 y 2, considerando que en el hover del 1 me de los insights que sacaste de esa cuenta.
+antes de modificar el artifact mostrame aca
+
+
+Se ejecutaron 12 comandos, archivo leído
+Se ejecutaron 12 comandos, archivo leído
+Ahora armo el widget con los dos gráficos y el tooltip enriquecido.
+
+
+
+Ahí tenés los dos gráficos con datos reales y hover con insights por cuenta (motor en riesgo, cuenta zombie, tope de cupo, días a renovación, ARR de Amplitude, etc.).
+
+¿Los llevo así al artifact (con el estilo Minders), o ajustamos algo de la lectura/diseño antes de meterlo?
+
+antes de mandarlo al artifact, que me podes decir de la pagina de Braze?
+
+
+Se ejecutaron 3 comandos
+Se ejecutaron 3 comandos
+La pestaña Braze es un reporte de sobreconsumo: 11 combinaciones cuenta-feature (MAU, MUV, WhatsApp, emails, datapoints) que están usando más de lo que tienen contratado. Antes de los números, un aviso: los datos vienen con un problema de formato (algunas celdas usan punto como separador de miles y quedaron leídas como decimales — ej. "45.671" en vez de "45,671"). Reconstruí los montos reales cruzando Usage-Allotment, que sí es consistente en 10 de las 11 filas.
+
+El caso más fuerte es Banco General — aparece 3 veces. Sobreconsume en las tres features que tiene: MAU (2.3% sobre cupo, leve), MUV (17.7% sobre) y datapoints (37.8% sobre, en una escala de 30 mil millones contratados). Es "motor" de tu cartera (2.7% del MARR). Ningún otro cliente satura tantas dimensiones del contrato a la vez — es el candidato más claro para una conversación de upsell integral, no feature por feature.
+
+Cencosud es el outlier en magnitud: contrató 1.8M de MAU y está usando 8.4M — 4.67x lo pactado (466.79% de consumo). Es una cuenta chica hoy (0.32% del MARR, grupo "estandarizar"), pero ese ratio de sobreconsumo sugiere que el contrato quedó muy por debajo de su operación real.
+
+Draftea también sobreconsume en dos features distintas (WhatsApp 110.6%, emails 192.2%) — señal de que el paquete completo quedó chico, no un feature aislado.
+
+Un dato para leer con cuidado: el "Pacing %" parece ser la señal más útil para priorizar, no el "Consumption %". Banco General en MAU muestra apenas 102% de consumo acumulado (parece poca cosa) pero 1249% de pacing — es decir, al ritmo actual va a terminar el período muy por encima del cupo. Lo mismo en Cencosud (466% consumo vs. 2367% pacing). El pacing es la proyección; el consumo acumulado todavía no refleja la urgencia.
+
+Un dato que no cierra: la fila de Addi (WhatsApp) muestra un "overage" negativo (-24.3M) y pacing de apenas 12.86%, lo que en realidad indica que está por debajo de su cupo, no por encima. Contradice el resto de la tabla y probablemente sea un dato viejo o mal cargado — lo dejaría afuera de cualquier gráfico hasta confirmarlo, para no llevar un número falso a la reunión.
+
+Cruce con tu cartera: de las 8 cuentas de esta lista, 3 son "motor" (Banco General, Addi, Puntos Colombia) y el resto son cuentas sanas de menor tamaño — ninguna aparece en riesgo. Es completamente una historia de upside: contratos que se quedaron chicos frente al uso real, sin urgencia de renovación de por medio.
+
+¿Sumo esto como la opción 4 (barras de overage) antes de tocar el artifact, o vamos directo con 1 y 2 que ya viste?
+
+dale, armate las barras de overage y sumale los insights al hover en cada cuenta...mostrame aca antes de ir al artifact
+
+
+Se ejecutaron 2 comandos
+Se ejecutaron 2 comandos
+
+
+Ahí están las barras, ordenadas de mayor a menor % sobre el cupo contratado. Cada una tiene en el hover: cuánto se excede en unidades reales, el pacing (proyección de ritmo), contexto de cartera (si es motor/expandir/etc y qué % del MARR), fecha de vencimiento de contrato, y la señal de "sobreconsume en varios features" para Banco General y Draftea. Dejé afuera la fila de Addi por la inconsistencia que vimos, con nota aclaratoria debajo del gráfico.
+
+¿Van los tres (1, 2 y 4) al artifact como la vista "Salud y renovaciones", o querés ajustar algo antes?
+
+dale, perfecto, vamos
+
+
+Ejecutó un comando
+Ejecutó un comando
+Ambos arrays están listos en el sandbox. Ahora integro todo al artifact real, con el mismo lenguaje visual (colores, tipografía, tooltips) que ya tiene.
+
+
+Editó 7 archivos, leyó 5 archivos, se ejecutaron 3 comandos
+Editó 7 archivos, leyó 5 archivos, se ejecutaron 3 comandos
+Ahora verifico visualmente con un screenshot rápido del HTML renderizado para confirmar que todo se ve bien antes de entregarlo.
+
+
+Ejecutó un comando, código buscado, editó un archivo
+Ejecutó un comando, código buscado, editó un archivo
+Buena captura — había quedado una referencia vieja sin corregir. Verifico de nuevo que todo compile y quede consistente.
+
+
+Ejecutó un comando
+Ejecutó un comando
+Todo compila. Actualizo la bitácora con lo que se sumó y comparto el archivo final.
+
+
+Leyó 2 archivos, editó un archivo, tareas actualizadas
+Leyó 2 archivos, editó un archivo, tareas actualizadas
+La sección "04 · Salud y renovaciones" ya está en el artifact, con el mismo estilo Minders del resto: 4 stat cards de resumen, el scatter riesgo × valor, el calendario de renovaciones y las barras de overage Braze, todos con hover de insights. Bitácora actualizada con el detalle.
+
+
+Nine box artifact
+Código · HTML 
+
+Bitacora sesion
+Documento · MD 
+
+
+
+
+Claude es IA y puede cometer errores. Verifica las respuestas. Danos tu opinión
+
+
+Nine box artifact · HTML
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minders · Cartera A+M — 9-box</title>
+<style>
+:root { color-scheme: light;
+  --m-black:#1c1f24; --m-white:#f2f2f2;
+  --m-lavender:#8799fb; --m-cyan:#a4f1fb; --m-mint:#b1fbae; --m-pink:#fc9edc; --m-coral:#fc7e7f;
+  --lav-d:#3730A3; --cyan-d:#0F766E; --mint-d:#047857; --pink-d:#9D174D; --coral-d:#B45309;
+  --b10:rgba(28,31,36,.10); --b50:rgba(28,31,36,.50); --b70:rgba(28,31,36,.70); --b05:rgba(28,31,36,.05);
+  --disp:'Max Fett','Archivo Black',-apple-system,'Helvetica Neue',sans-serif;
+  --mono:'Space Mono','SF Mono',Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{font-family:var(--mono);font-size:14px;line-height:1.55;color:var(--m-black);background:var(--m-white);-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+.wrap{max-width:1200px;margin:0 auto;padding:24px clamp(16px,3vw,36px) 48px}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding-bottom:20px;border-bottom:1px solid var(--b10);flex-wrap:wrap;gap:12px}
+.brand{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.anag{width:44px;color:var(--m-black)}
+.h1{font-family:var(--disp);font-weight:900;font-size:clamp(26px,4vw,44px);letter-spacing:-.03em;line-height:1.02}
+.h3{font-family:var(--disp);font-weight:900;font-size:clamp(14px,1.6vw,17px);letter-spacing:-.01em;line-height:1.2}
+.eyebrow{font-size:12px;opacity:.75}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:6px 14px;border-radius:999px;border:1px solid currentColor;background:transparent;white-space:nowrap;line-height:1.2}
+.chip--filled{background:var(--m-black);color:var(--m-white);border-color:var(--m-black)}
+.rombo{width:36px;height:36px;background:var(--m-black);transform:rotate(45deg);display:inline-flex;align-items:center;justify-content:center;margin:0 6px}
+.rombo span{transform:rotate(-45deg);font-size:10px;color:var(--m-white)}
+.hero{margin-top:28px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}
+.stat-card{background:#fff;border:1px solid var(--b10);border-radius:18px;padding:16px 18px}
+.stat{font-family:var(--disp);font-weight:900;font-size:clamp(26px,3vw,38px);letter-spacing:-.03em;line-height:1}
+.stat-label{font-size:11px;opacity:.65;margin-top:6px;line-height:1.45}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-top:28px;align-items:center}
+.filters .lbl{font-size:11px;opacity:.6;margin-right:4px;letter-spacing:.05em}
+.fchip{font-size:12px;padding:6px 16px;border-radius:999px;border:1px solid var(--m-black);transition:all .15s}
+.fchip.on{background:var(--m-black);color:var(--m-white)}
+.gridzone{display:grid;grid-template-columns:26px 1fr;gap:8px;margin-top:22px}
+.ylab{display:flex;align-items:center;justify-content:center}
+.ylab span{writing-mode:vertical-rl;transform:rotate(180deg);font-size:10px;opacity:.5;letter-spacing:.08em;white-space:nowrap}
+.nine{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.xlabs{display:grid;grid-template-columns:26px repeat(3,1fr);gap:10px;margin-top:8px}
+.xlabs div{text-align:center;font-size:10px;opacity:.5;letter-spacing:.06em}
+.cell{background:#fff;border:1px solid var(--b10);border-top:5px solid var(--b10);border-radius:14px;padding:13px 15px;text-align:left;transition:transform .15s ease, box-shadow .15s ease;min-height:120px;display:flex;flex-direction:column;cursor:pointer}
+.cchip{font-size:10px;padding:2px 8px;border-radius:999px;border:1px solid var(--b10);display:inline-block;cursor:pointer}
+.cchip:hover{border-color:var(--m-black)}
+.cell:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(28,31,36,.08)}
+.cell.sel{outline:2px solid var(--m-black)}
+.cell .cn{font-family:var(--disp);font-weight:900;font-size:clamp(20px,2.4vw,30px);letter-spacing:-.03em;line-height:1}
+.cell .ct{font-size:12.5px;font-weight:700;margin-top:2px}
+.cell .cs{font-size:10.5px;opacity:.6;margin-top:auto;padding-top:8px}
+.cell .cdisc{font-size:11px;opacity:.72;line-height:1.5;margin-top:7px}
+.cell .ce{font-size:10px;letter-spacing:.04em;opacity:.85}
+.detail{background:#fff;border:1px solid var(--b10);border-radius:18px;padding:20px 22px;margin-top:18px}
+.dhead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.dchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.acc{font-size:12px;padding:5px 13px;border-radius:999px;border:1px solid var(--b10);transition:all .15s}
+.acc:hover{border-color:var(--m-black)}
+.ficha{margin-top:14px;padding-top:14px;border-top:1px solid var(--b10);font-size:13px;display:none}
+.ficha .frow{display:flex;gap:24px;flex-wrap:wrap;margin-top:8px}
+.plan{margin-top:32px}
+.plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-top:14px}
+.plan-card{background:#fff;border:1px solid var(--b10);border-radius:18px;padding:16px 18px}
+.plan-item{display:flex;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--b05);font-size:12.5px}
+.plan-item:last-child{border-bottom:0}
+.plan-item .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;position:relative;top:0}
+.footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--b10);display:flex;justify-content:space-between;opacity:.5;font-size:10px;flex-wrap:wrap;gap:8px}
+.bubtip{position:fixed;pointer-events:none;background:var(--m-black);color:var(--m-white);font-size:11px;line-height:1.6;padding:9px 13px;border-radius:10px;z-index:60;display:none;box-shadow:0 6px 18px rgba(28,31,36,.28);white-space:nowrap}
+.bubtip b{font-family:var(--disp);font-weight:900;font-size:13px;letter-spacing:-.01em}
+@media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}.nine{grid-template-columns:1fr}.gridzone{grid-template-columns:1fr}.ylab,.xlabs{display:none}.plan-grid{grid-template-columns:1fr}.cell{min-height:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ 
+<header class="topbar">
+  <div class="brand">
+    <svg class="anag" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1011.23 602.6"><g fill="currentColor"><path d="M136.35,592.63l169.44-347.07,1.16,347.07h136.31l179.02-348.46,1.16,348.46h127.92l-1.65-493.31c.26-39.07-23.6-74.26-59.99-88.48-35.18-13.85-75.25-4.56-100.75,23.35l-5.92,6.41-149.05,290.11-.78-236.51C433.81,42.79,392.62.61,341.19,0c-25.23-.3-49.49,9.65-67.25,27.58l-7.83,7.68-137.19,281.01.64-176.1-127.91-.46-1.64,452.92h136.35Z"/><path d="M1011.23,509.12c0,51.62-41.85,93.47-93.47,93.48-51.62,0-93.47-41.85-93.48-93.47,0-51.62,41.85-93.47,93.47-93.48h0c51.62,0,93.47,41.84,93.47,93.46h0"/></g></svg>
+    <span class="chip chip--filled">OPS · CARTERA</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <span class="chip">Abril + Mayo 2026</span>
+    <span class="chip" id="nchip">121 cuentas</span>
+    <div class="rombo"><span>01</span></div>
+  </div>
+</header>
+ 
+<section class="hero">
+  <span class="eyebrow">Análisis estratégico de operación</span>
+  <h1 class="h1">La cartera, en<br>nueve decisiones</h1>
+</section>
+ 
+<section class="stats" id="stats"></section>
+ 
+<div class="filters" id="filters">
+  <span class="lbl">REGIÓN</span>
+  <button class="fchip on" data-t="all">Todos</button>
+  <button class="fchip" data-t="NOLA">NOLA</button>
+  <button class="fchip" data-t="SOLA">SOLA</button>
+  <button class="fchip" data-t="BR">BR</button>
+  <button class="fchip" data-t="IBERIA">IBERIA</button>
+  <span class="lbl" style="margin-left:14px">TIER</span>
+  <button class="fchip tchip on" data-tier="0">Todos</button>
+  <button class="fchip tchip" data-tier="1">1</button>
+  <button class="fchip tchip" data-tier="2">2</button>
+  <button class="fchip tchip" data-tier="3">3</button>
+  <button class="fchip tchip" data-tier="4">4</button>
+</div>
+ 
+<div class="gridzone">
+  <div class="ylab"><span>← DEDICACIÓN: SIN · EN LÍNEA · EXCEDIDA</span></div>
+  <div class="nine" id="nine"></div>
+</div>
+<div class="xlabs"><div></div><div>APORTE AL MARR BAJO (&lt;0.3%)</div><div>APORTE MEDIO (0.3–1%)</div><div>APORTE ALTO (≥1%)</div></div>
+ 
+<section style="margin-top:30px">
+<h2 class="h3" style="font-size:clamp(18px,2.2vw,24px)"><span class="eyebrow" style="opacity:.4;margin-right:10px">02</span>Esfuerzo vs. retorno por cuenta</h2>
+<div style="background:#fff;border:1px solid var(--b10);border-radius:18px;padding:14px 10px 6px;margin-top:12px" id="bubble"></div>
+<div style="display:flex;gap:12px;flex-wrap:wrap;font-size:11px;opacity:.75;margin-top:8px;align-items:center">
+<span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#378ADD"></span>&lt;5% revisar</span>
+<span style="display:flex;align-items:center;gap:5px"><span style="width:34px;height:8px;border-radius:4px;background:linear-gradient(to right,#0F6E56,#97C459)"></span>5–19% sano</span>
+<span style="display:flex;align-items:center;gap:5px"><span style="width:34px;height:8px;border-radius:4px;background:linear-gradient(to right,#F5C842,#E06D10)"></span>20–50% atención</span>
+<span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#E24B4A"></span>&gt;50% crítico</span>
+<span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#888780"></span>KOF</span>
+<span style="opacity:.7">color = costo/MARR del bimestre · tamaño = MARR anual 2026 · click abre la ficha</span>
+</div>
+</section>
+<section class="detail" id="detail"><span style="font-size:13px;opacity:.5">Tocá una celda de la matriz para ver sus cuentas</span></section>
+ 
+<section class="plan">
+  <h2 class="h3" style="font-size:clamp(18px,2.2vw,24px)"><span class="eyebrow" style="opacity:.4;margin-right:10px">03</span>Plan de acción</h2>
+  <div class="plan-grid" id="plan"></div>
+</section>
+ 
+<section style="margin-top:40px">
+<h2 class="h3" style="font-size:clamp(18px,2.2vw,24px)"><span class="eyebrow" style="opacity:.4;margin-right:10px">04</span>Salud y renovaciones — Amplitude + Braze</h2>
+<p style="font-size:12.5px;opacity:.65;margin-top:6px;max-width:640px;line-height:1.5">61% del MARR tiene visibilidad de salud de producto. El 9-box de arriba mide si les dedicás las horas correctas; esta vista mide si van a renovar.</p>
+<section class="stats" id="hstats" style="margin-top:20px"></section>
+ 
+<div style="margin-top:26px">
+<div class="h3" style="font-size:15px">Riesgo × valor</div>
+<div style="font-size:11.5px;opacity:.6;margin:4px 0 10px;max-width:600px">Adopción real (MAU) vs. cuánto pesa la cuenta en el MARR de la compañía. Tamaño = ARR anual en Amplitude.</div>
+<div style="background:#fff;border:1px solid var(--b10);border-radius:18px;padding:14px 10px 6px" id="hscatter"></div>
+<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:11px;opacity:.75;margin-top:8px">
+<span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#0F6E56"></span>Low</span>
+<span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#E0A020"></span>Medium</span>
+<span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#E06D10"></span>High</span>
+<span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#E24B4A"></span>Critical</span>
+<span style="opacity:.7">tamaño = ARR anual en Amplitude · hover para el detalle</span>
+</div>
+</div>
+ 
+<div style="margin-top:28px">
+<div class="h3" style="font-size:15px">Calendario de renovaciones</div>
+<div style="font-size:11.5px;opacity:.6;margin:4px 0 10px;max-width:600px">Días a renovación por tier de riesgo. Zonas sombreadas = ventana urgente (&lt;30 y 30–90 días).</div>
+<div style="background:#fff;border:1px solid var(--b10);border-radius:18px;padding:14px 10px 6px" id="htimeline"></div>
+</div>
+ 
+<div style="margin-top:28px">
+<div class="h3" style="font-size:15px">Sobreconsumo Braze — pipeline de upsell</div>
+<div style="font-size:11.5px;opacity:.6;margin:4px 0 10px;max-width:600px">% de uso sobre lo contratado, por cuenta y feature. Línea punteada = cupo contratado.</div>
+<div style="background:#fff;border:1px solid var(--b10);border-radius:18px;padding:14px 16px 8px" id="hbars"></div>
+<div style="font-size:10.5px;opacity:.5;margin-top:8px">No incluye Addi (WhatsApp): dato inconsistente en la fuente (overage negativo), a validar con el equipo de datos.</div>
+</div>
+</section>
+ 
+<div class="bubtip" id="bubtip"></div>
+<footer class="footer">
+  <span>Minders · Análisis de operación A+M 2026 · Confidencial — uso interno</span>
+  <span>minders.io</span>
+</footer>
+ 
+</div>
+<script>
+const D=[["Kueski","NOLA",0.07935,0.03677,70.0,115.5,3425,104015,0.033,"motor","L",409,48,63,"",1],["MCS","SOLA",0.06036,0.01103,21.0,34.7,1212,44932,0.027,"motor","C",44,3,9,"",1],["Banco Davivienda","NOLA",0.05899,0.02143,68.3,39.8,2089,87824,0.024,"motor","",-1,-1,-1,"",1],["Addi","NOLA",0.05441,0.01188,31.6,28.4,1071,55054,0.019,"motor","L",622,52,27,"whatsapp",1],["KOF","NOLA",0.04836,0.21722,325.1,770.8,20343,72340,0.281,"kof","",-1,-1,-1,"",1],["Cashea","SOLA",0.0392,0.00793,0.0,40.0,1000,29178,0.034,"motor","",-1,-1,-1,"",1],["Mercado Libre","SOLA",0.03896,0.02205,59.0,52.2,1989,29000,0.069,"motor","M",228,1506,69,"",1],["DeUna","SOLA",0.0324,0.01253,17.0,46.2,1337,24157,0.055,"motor","C",197,7,2,"",1],["Serasa","BR",0.02862,0.03944,62.0,137.0,72,42608,0.002,"motor","H",44,88,106,"",1],["Banco General","NOLA",0.02678,0.00829,25.2,16.6,573,13288,0.043,"motor","",-1,-1,-1,"datapoints+mau+muv",1],["CloudWalk","BR",0.02585,0.00813,19.5,21.5,3308,38480,0.086,"motor","M",197,246,83,"",1],["Stone","BR",0.02454,0.01273,19.0,45.2,1245,18270,0.068,"motor","M",197,416,48,"",1],["Paris","SOLA",0.02251,0.06589,69.0,263.5,6621,11172,0.593,"corregir","",-1,-1,-1,"",1],["Creditas","BR",0.02236,0.00529,2.8,23.9,587,22188,0.026,"motor","",-1,-1,-1,"",1],["GOL","BR",0.02113,0.006,7.5,22.8,539,15731,0.034,"motor","L",44,111,88,"",1],["ITTI","SOLA",0.02027,0.0004,2.0,0.0,38,10059,0.004,"motor","L",653,181,24,"",1],["Baubap","NOLA",0.01751,0.00725,17.5,19.1,629,26074,0.024,"motor","",-1,-1,-1,"",1],["Arca Continental","NOLA",0.01696,0.00836,30.3,11.9,736,36169,0.02,"motor","L",13,55,96,"",1],["Modo","SOLA",0.01275,0.00437,5.6,16.5,394,9493,0.042,"motor","L",228,117,60,"",1],["Wellhub","BR",0.01171,0.00238,3.0,9.0,222,8718,0.025,"motor","H",562,62,20,"",1],["PPM","SOLA",0.01074,0.01394,17.4,52.9,1456,19936,0.073,"motor","L",44,38,56,"emails",1],["Banco Industrial de Guatemala","NOLA",0.01034,0.00238,7.0,5.0,238,5130,0.046,"motor","",-1,-1,-1,"",1],["Puntos Colombia","NOLA",0.01022,0.01607,57.6,23.5,1464,15213,0.096,"motor","",-1,-1,-1,"mau",1],["Spin","NOLA",0.01002,0.00093,0.5,4.2,83,10331,0.008,"motor","",-1,-1,-1,"",1],["Kavak","NOLA",0.00959,0.00078,1.2,2.8,71,14282,0.005,"estandarizar","L",75,81,60,"",2],["Ridery","SOLA",0.00864,0.01234,38.6,23.7,1337,8244,0.162,"expandir","L",1018,25,22,"",2],["Bold","NOLA",0.00823,0.01852,70.4,23.0,1158,12253,0.094,"estandarizar","L",75,64,104,"",2],["Will Bank","BR",0.00807,0.0,0.0,0.0,0,4974,0.0,"reactivar","C",136,1,8,"",2],["Mercado Bitcoin","BR",0.00807,0.01093,28.4,26.8,1214,4515,0.269,"estandarizar","",-1,-1,-1,"",2],["Cocos Capital","SOLA",0.00787,0.0,0.0,0.0,0,6926,0.0,"reactivar","L",622,26,13,"",2],["Stori","NOLA",0.00762,0.00232,5.8,6.0,226,5671,0.04,"expandir","L",287,220,29,"",2],["ContaAzul","BR",0.00747,0.02552,67.2,61.5,2672,8790,0.304,"repricing","L",562,73,57,"",2],["Claro Pay Mexico","NOLA",0.00735,0.00248,5.0,7.5,213,5473,0.039,"expandir","",-1,-1,-1,"mau",2],["Distelsa","NOLA",0.00682,0.00248,7.5,5.0,240,5298,0.045,"expandir","",-1,-1,-1,"",2],["Rappi","SOLA",0.00672,0.00077,3.2,0.7,78,10000,0.008,"expandir","",-1,-1,-1,"",2],["Finsus","NOLA",0.00639,0.00412,9.5,11.3,363,9510,0.038,"estandarizar","L",197,11,52,"",2],["MEU TUDO","BR",0.00616,0.00168,3.0,5.5,153,7418,0.021,"expandir","L",75,33,70,"",2],["Arajet","NOLA",0.00597,0.01224,25.5,36.2,1188,4442,0.268,"estandarizar","L",256,10,24,"",2],["Draftea","NOLA",0.00594,0.00454,5.6,17.3,504,12757,0.04,"estandarizar","",-1,-1,-1,"emails+whatsapp",2],["GLOBO","BR",0.00589,0.00694,20.0,15.0,678,6543,0.104,"estandarizar","M",653,116,15,"",2],["TelevisaUnivision","NOLA",0.00581,0.08049,222.1,184.1,6212,17302,0.359,"crecer","",-1,-1,-1,"",2],["Riachuelo","BR",0.00576,0.00664,13.5,20.0,606,4286,0.141,"estandarizar","L",197,41,50,"",2],["Rabbit Mx","NOLA",0.00519,0.00792,20.2,19.8,886,7729,0.115,"expandir","",-1,-1,-1,"",3],["Alicorp","SOLA",0.00516,0.00773,23.2,15.8,770,2559,0.301,"estandarizar","",-1,-1,-1,"",3],["Galicia Seguros","SOLA",0.00503,0.0,0.0,0.0,0,1874,0.0,"reactivar","",-1,-1,-1,"",3],["Mevo","BR",0.00481,0.01001,24.5,26.0,937,7161,0.131,"expandir","L",197,28,41,"",3],["BAC Credomatic","NOLA",0.00471,0.0,0.0,0.0,0,7012,0.0,"reactivar","",-1,-1,-1,"",3],["Apex Global","NOLA",0.0045,0.00922,22.2,24.2,906,4173,0.217,"estandarizar","L",228,29,-1,"",3],["Dominó","SOLA",0.00441,0.01579,52.0,27.6,1726,3827,0.451,"monitoreo","",-1,-1,-1,"",3],["Betterware Mexico","NOLA",0.00409,0.00586,11.7,17.9,535,6090,0.088,"expandir","L",197,15,60,"",3],["MultiMoney","NOLA",0.00379,0.00118,2.0,3.9,107,2822,0.038,"expandir","H",531,32,10,"",3],["Agora","SOLA",0.0037,0.00302,7.0,8.2,276,1835,0.151,"expandir","C",928,-1,5,"",3],["ClickBus","BR",0.00367,0.00302,6.8,8.5,274,5466,0.05,"estandarizar","H",653,53,10,"",3],["Plataforma 10","SOLA",0.00358,0.0016,0.0,8.1,142,5328,0.027,"expandir","L",287,64,17,"",3],["Banco Guayaquil","SOLA",0.00344,0.02874,116.4,28.6,2978,9009,0.331,"repricing","",-1,-1,-1,"",3],["Compartamos Financiera PERÚ","SOLA",0.00336,0.00337,0.0,17.0,312,2503,0.125,"expandir","L",197,29,32,"",3],["PeiGo","SOLA",0.00333,0.0,0.0,0.0,0,4956,0.0,"reactivar","",-1,-1,-1,"",3],["Cencosud","SOLA",0.00322,0.00383,9.0,10.3,425,1600,0.266,"estandarizar","",-1,-1,-1,"mau",3],["Lemon Cash","SOLA",0.0031,0.0,0.0,0.0,0,2306,0.0,"reactivar","",-1,-1,-1,"",3],["Buser","BR",0.00309,0.00139,5.0,2.0,140,4601,0.03,"expandir","L",197,25,35,"",3],["Astropay","SOLA",0.00305,0.0,0.0,0.0,0,2270,0.0,"reactivar","H",317,14,5,"",3],["Alegra","NOLA",0.00295,0.00159,5.0,3.0,153,2198,0.07,"estandarizar","L",440,90,72,"",3],["La Casa de Tono","NOLA",0.00286,0.00377,7.0,12.0,418,4211,0.099,"estandarizar","",-1,-1,-1,"muv",3],["Gran Cursos Online","BR",0.00285,0.00035,0.8,1.0,32,2214,0.014,"estandarizar","L",378,89,92,"",3],["Konfio","NOLA",0.0028,0.00254,0.0,12.8,231,4167,0.055,"expandir","H",228,46,3,"",3],["Tyba","NOLA",0.00278,0.00794,16.6,23.5,569,3857,0.147,"estandarizar","",-1,-1,-1,"",3],["Lulo Bank","NOLA",0.00272,0.00526,14.2,12.3,476,5183,0.092,"expandir","M",317,40,4,"",3],["Prestige Holdings Limited","NOLA",0.00269,0.0087,0.0,43.9,812,9600,0.085,"crecer","",-1,-1,-1,"",3],["Xepelin","SOLA",0.00269,0.0,0.0,0.0,0,2000,0.0,"reactivar","C",105,1,18,"",3],["COPEC S.A.","SOLA",0.00257,0.00064,1.2,2.0,65,667,0.098,"expandir","L",166,46,77,"",3],["Platzi","NOLA",0.00255,0.00495,21.2,3.8,502,1901,0.264,"estandarizar","L",622,20,32,"",3],["DM","BR",0.00241,0.00694,6.8,28.2,669,1792,0.373,"estandarizar","L",653,37,23,"",3],["Coca-Cola Embonor","SOLA",0.00237,0.00215,0.0,10.8,185,3260,0.057,"expandir","",-1,-1,-1,"",3],["Nomad","BR",0.00232,0.00059,1.0,2.0,54,2593,0.021,"estandarizar","L",317,78,10,"",3],["tur.com","SOLA",0.00225,0.00159,0.0,8.0,155,1609,0.096,"expandir","H",470,10,6,"",3],["Minutrade","BR",0.00223,0.0071,14.1,21.8,760,1661,0.458,"estandarizar","",-1,-1,-1,"",4],["Tienda Pago","NOLA",0.00204,0.00439,11.0,11.2,440,1517,0.29,"estandarizar","",-1,-1,-1,"",4],["Fluency Academy","BR",0.00202,0.00109,5.0,0.5,116,1500,0.077,"expandir","H",197,8,20,"",4],["Consorcio","SOLA",0.00186,0.00023,0.0,1.2,19,1383,0.014,"expandir","L",136,56,83,"",4],["Civitatis","IBERIA",0.00181,0.0,0.0,0.0,0,0,0,"reactivar","",-1,-1,-1,"",4],["SorteosTec","NOLA",0.00179,0.00608,23.8,6.9,719,1333,0.539,"warning","",-1,-1,-1,"",4],["Ripio","SOLA",0.00179,0.00159,4.0,4.0,144,1333,0.108,"estandarizar","L",136,10,35,"",4],["Monkey","BR",0.00179,0.00867,23.8,20.0,962,1333,0.722,"warning","",-1,-1,-1,"",4],["Conta Simples","BR",0.00174,0.0004,0.0,2.0,36,1072,0.034,"estandarizar","L",775,64,33,"",4],["Niba","IBERIA",0.0017,0.01457,0.0,73.5,1261,5060,0.249,"crecer","",-1,-1,-1,"",4],["iFood","BR",0.00168,0.0,0.0,0.0,0,0,0,"reactivar","",-1,-1,-1,"",4],["Inteligo Group","SOLA",0.00168,0.00452,18.9,4.0,499,1250,0.399,"estandarizar","",-1,-1,-1,"",4],["Remessa Online","BR",0.00166,0.0,0.0,0.0,0,0,0,"reactivar","",-1,-1,-1,"",4],["G4 Educação","BR",0.00161,0.0,0.0,0.0,0,2400,0.0,"reactivar","",-1,-1,-1,"",4],["Food Delivery Brands","NOLA",0.00148,0.02214,53.9,57.8,2481,2203,1.126,"renegociar","",-1,-1,-1,"",4],["trii","NOLA",0.00134,0.0,0.0,0.0,0,1000,0.0,"reactivar","C",13,3,111,"",4],["Banco Atlántida","NOLA",0.00127,0.0002,1.0,0.0,18,944,0.019,"expandir","C",348,3,-1,"",4],["Migrante","SOLA",0.00121,0.0,0.0,0.0,0,752,0.0,"reactivar","L",683,57,9,"",4],["Buk","SOLA",0.00118,0.0,0.0,0.0,0,880,0.0,"reactivar","L",562,131,81,"",4],["Treinta","NOLA",0.00118,0.00109,5.5,0.0,99,880,0.113,"estandarizar","L",622,16,34,"",4],["Grupo OLX","BR",0.0042,0.00966,20.0,28.8,1078,5600,0.193,"crecer","",-1,-1,-1,"",3],["Puramente","SOLA",0.00101,0.0,0.0,0.0,0,500,0.0,"reactivar","",-1,-1,-1,"",4],["bineo","NOLA",0.00101,0.0,0.0,0.0,0,500,0.0,"reactivar","",-1,-1,-1,"",4],["Tipti","SOLA",0.00097,0.0,0.0,0.0,0,720,0.0,"reactivar","L",44,21,105,"",4],["Pravaler","BR",0.00091,0.00357,14.0,4.0,321,1310,0.245,"crecer","H",317,13,5,"",4],["Trela","BR",0.00091,0.0,0.0,0.0,0,1350,0.0,"reactivar","H",13,-1,25,"",4],["Consubanco","NOLA",0.0009,0.00074,0.8,3.0,68,444,0.152,"expandir","L",256,19,16,"",4],["Alice","BR",0.0009,0.0,0.0,0.0,0,0,0,"reactivar","",-1,-1,-1,"",4],["Crehana","SOLA",0.0009,0.0,0.0,0.0,0,0,0,"reactivar","",-1,-1,-1,"",4],["Banza","SOLA",0.0009,0.0,0.0,0.0,0,667,0.0,"reactivar","C",44,2,15,"",4],["Matrix Energia","BR",0.0009,0.00104,0.0,5.2,82,667,0.123,"estandarizar","C",197,8,1,"",4],["Maskots","IBERIA",0.00084,0.00981,35.5,14.0,979,5000,0.196,"crecer","",-1,-1,-1,"",4],["Cercle","IBERIA",0.00084,0.0,0.0,0.0,0,2500,0.0,"reactivar","",-1,-1,-1,"",4],["iAhorro","IBERIA",0.00084,0.00273,3.4,10.3,274,2500,0.109,"crecer","",-1,-1,-1,"",4],["Wenia","NOLA",0.00079,0.00396,12.5,7.5,242,1183,0.204,"estandarizar","",-1,-1,-1,"",4],["BN Americas","SOLA",0.00078,0.0,0.0,0.0,0,583,0.0,"reactivar","C",44,3,7,"",4],["Pash","NOLA",0.00078,0.00352,3.5,14.2,320,583,0.548,"revision","L",136,22,74,"",4],["Bitfinex, Inc.","SOLA",0.00067,0.00312,6.0,9.8,284,650,0.436,"revision","M",228,15,11,"",4],["ClearSale","BR",0.00063,0.0,0.0,0.0,0,933,0.0,"reactivar","L",-17,5,-1,"",4],["Banco Plata","NOLA",0.00061,0.0,0.0,0.0,0,0,0,"reactivar","",-1,-1,-1,"",4],["Mejor CDT","NOLA",0.00056,0.0,0.0,0.0,0,417,0.0,"reactivar","",-1,-1,-1,"",4],["Rocket.la","NOLA",0.00045,0.0,0.0,0.0,0,333,0.0,"reactivar","C",13,1,72,"",4],["RespondeAI","BR",0.00036,0.0,0.0,0.0,0,270,0.0,"reactivar","H",348,7,1,"",4],["Vitat","BR",0.00024,0.0001,0.0,0.5,8,196,0.038,"estandarizar","H",136,20,22,"",4],["Iati","IBERIA",0.00017,0.00345,8.7,8.8,288,1500,0.192,"crecer","",-1,-1,-1,"",4],["Farmatodo","NOLA",0.00011,0.00109,3.5,2.0,100,1447,0.069,"estandarizar","H",409,68,100,"",4]];
+const G={motor:"Motor",kof:"Equipo dedicado",corregir:"Corregir",expandir:"Expandir",estandarizar:"Estandarizar",crecer:"Crecer",reactivar:"Reactivar",repricing:"Repricing",renegociar:"Renegociar",monitoreo:"Monitoreo",warning:"Warning",revision:"Revisión"};
+const ACC={motor:"Proteger y cosechar",kof:"Staff augmentation — usa lo que paga, tablero propio",corregir:"Ratio de costo sobre MARR del bimestre fuera de rango (59%) — corregir alcance, dedicación o pricing",expandir:"Candidata a upsell / cross-sell",estandarizar:"Atención por proceso y playbooks",crecer:"Inversión consciente — mantener para crecer",reactivar:"Health check — sin contacto en el bimestre",repricing:"Revisar pricing en la renovación",renegociar:"Renegociar alcance: dedica más de lo que paga",monitoreo:"Seguir de cerca la evolución de horas",warning:"Revisar: costo de servir fuera de rango",revision:"Revisión de la relación"};
+const CORR=["corregir","repricing","renegociar","monitoreo","warning","revision"];
+const HD=[["Kueski","NOLA","motor",7.93,3.3,"Low",409,48.0,200176,"Motor de cartera, sin señales de riesgo hoy."],["MCS","SOLA","motor",6.04,2.7,"Critical",44,3.0,24000,"Motor de cartera con riesgo real de no renovar; paga bien pero casi no usa el producto."],["Addi","NOLA","motor",5.44,1.9,"Low",622,52.0,85680,"Motor de cartera, sin señales de riesgo hoy."],["Mercado Libre","SOLA","motor",3.9,6.9,"Medium",228,1506.0,2749468,"Motor de cartera, sin señales de riesgo hoy."],["DeUna","SOLA","motor",3.24,5.5,"Critical",197,7.0,55282,"Motor de cartera con riesgo real de no renovar."],["Serasa","BR","motor",2.86,0.2,"High",44,88.0,1209839,"Motor de cartera con riesgo real de no renovar; al tope de cupo contratado (106% de eventos, hay upsell en la renovación)."],["CloudWalk","BR","motor",2.58,8.6,"Medium",197,246.0,null,"Motor de cartera, sin señales de riesgo hoy."],["Stone","BR","motor",2.45,6.8,"Medium",197,416.0,511552,"Motor de cartera, sin señales de riesgo hoy."],["GOL","BR","motor",2.11,3.4,"Low",44,111.0,195228,"Motor de cartera, sin señales de riesgo hoy."],["ITTI","SOLA","motor",2.03,0.4,"Low",653,181.0,null,"Motor de cartera, sin señales de riesgo hoy."],["Arca Continental","NOLA","motor",1.7,2.0,"Low",13,55.0,49572,"Motor de cartera, sin señales de riesgo hoy."],["Modo","SOLA","motor",1.28,4.2,"Low",228,117.0,null,"Motor de cartera, sin señales de riesgo hoy."],["Wellhub","BR","motor",1.17,2.5,"High",562,62.0,82431,"Motor de cartera con riesgo real de no renovar."],["PPM","SOLA","motor",1.07,7.3,"Low",44,38.0,29257,"Motor de cartera, sin señales de riesgo hoy."],["Kavak","NOLA","estandarizar",0.96,0.5,"Low",75,81.0,218000,"Sin señales adicionales más allá del tier de riesgo."],["Ridery","SOLA","expandir",0.86,16.2,"Low",1018,25.0,null,"Sin señales adicionales más allá del tier de riesgo."],["Bold","NOLA","estandarizar",0.82,9.4,"Low",75,64.0,36000,"Al tope de cupo contratado (104% de eventos, hay upsell en la renovación)."],["Will Bank","BR","reactivar",0.81,0.0,"Critical",136,1.0,140000,"Paga bien pero casi no usa el producto."],["Cocos Capital","SOLA","reactivar",0.79,0.0,"Low",622,26.0,53870,"Sin señales adicionales más allá del tier de riesgo."],["Stori","NOLA","expandir",0.76,4.0,"Low",287,220.0,null,"Sin señales adicionales más allá del tier de riesgo."],["ContaAzul","BR","repricing",0.75,30.4,"Low",562,73.0,null,"Sin señales adicionales más allá del tier de riesgo."],["Finsus","NOLA","estandarizar",0.64,3.8,"Low",197,11.0,25920,"Sin señales adicionales más allá del tier de riesgo."],["MEU TUDO","BR","expandir",0.62,2.1,"Low",75,33.0,67773,"Sin señales adicionales más allá del tier de riesgo."],["Arajet","NOLA","estandarizar",0.6,26.8,"Low",256,10.0,24000,"Sin señales adicionales más allá del tier de riesgo."],["GLOBO","BR","estandarizar",0.59,10.4,"Medium",653,116.0,350911,"Sin señales adicionales más allá del tier de riesgo."],["Riachuelo","BR","estandarizar",0.58,14.1,"Low",197,41.0,null,"Sin señales adicionales más allá del tier de riesgo."],["Mevo","BR","expandir",0.48,13.1,"Low",197,28.0,56784,"Sin señales adicionales más allá del tier de riesgo."],["Apex Global","NOLA","estandarizar",0.45,21.7,"Low",228,29.0,55890,"Sin señales adicionales más allá del tier de riesgo."],["Betterware Mexico","NOLA","expandir",0.41,8.8,"Low",197,15.0,null,"Sin señales adicionales más allá del tier de riesgo."],["MultiMoney","NOLA","expandir",0.38,3.8,"High",531,32.0,34830,"Sin señales adicionales más allá del tier de riesgo."],["Agora","SOLA","expandir",0.37,15.1,"Critical",928,null,42120,"Sin señales adicionales más allá del tier de riesgo."],["ClickBus","BR","estandarizar",0.37,5.0,"High",653,53.0,73000,"Sin señales adicionales más allá del tier de riesgo."],["Plataforma 10","SOLA","expandir",0.36,2.7,"Low",287,64.0,49784,"Sin señales adicionales más allá del tier de riesgo."],["Compartamos Financiera PERÚ","SOLA","expandir",0.34,12.5,"Low",197,29.0,null,"Sin señales adicionales más allá del tier de riesgo."],["Buser","BR","expandir",0.31,3.0,"Low",197,25.0,38880,"Sin señales adicionales más allá del tier de riesgo."],["Astropay","SOLA","reactivar",0.3,0.0,"High",317,14.0,77760,"Sin señales adicionales más allá del tier de riesgo."],["Alegra","NOLA","estandarizar",0.3,7.0,"Low",440,90.0,55319,"Sin señales adicionales más allá del tier de riesgo."],["Gran Cursos Online","BR","estandarizar",0.28,1.4,"Low",378,89.0,64784,"Sin señales adicionales más allá del tier de riesgo."],["Konfio","NOLA","expandir",0.28,5.5,"High",228,46.0,24000,"Sin señales adicionales más allá del tier de riesgo."],["Lulo Bank","NOLA","expandir",0.27,9.2,"Medium",317,40.0,37325,"Sin señales adicionales más allá del tier de riesgo."],["Xepelin","SOLA","reactivar",0.27,0.0,"Critical",105,1.0,16000,"Paga bien pero casi no usa el producto."],["COPEC S.A.","SOLA","expandir",0.26,9.8,"Low",166,46.0,null,"Sin señales adicionales más allá del tier de riesgo."],["Platzi","NOLA","estandarizar",0.26,26.4,"Low",622,20.0,34560,"Sin señales adicionales más allá del tier de riesgo."],["DM","BR","estandarizar",0.24,37.3,"Low",653,37.0,33000,"Sin señales adicionales más allá del tier de riesgo."],["Nomad","BR","estandarizar",0.23,2.1,"Low",317,78.0,null,"Sin señales adicionales más allá del tier de riesgo."],["tur.com","SOLA","expandir",0.23,9.6,"High",470,10.0,null,"Sin señales adicionales más allá del tier de riesgo."],["Fluency Academy","BR","expandir",0.2,7.7,"High",197,8.0,24000,"Sin señales adicionales más allá del tier de riesgo."],["Consorcio","SOLA","expandir",0.19,1.4,"Low",136,56.0,10400,"Sin señales adicionales más allá del tier de riesgo."],["Ripio","SOLA","estandarizar",0.18,10.8,"Low",136,10.0,24000,"Sin señales adicionales más allá del tier de riesgo."],["Conta Simples","BR","estandarizar",0.17,3.4,"Low",775,64.0,51943,"Sin señales adicionales más allá del tier de riesgo."],["trii","NOLA","reactivar",0.13,0.0,"Critical",13,3.0,24000,"Paga bien pero casi no usa el producto; al tope de cupo contratado (111% de eventos, hay upsell en la renovación)."],["Banco Atlántida","NOLA","expandir",0.13,1.9,"Critical",348,3.0,null,"Paga bien pero casi no usa el producto."],["Migrante","SOLA","reactivar",0.12,0.0,"Low",683,57.0,32714,"Sin señales adicionales más allá del tier de riesgo."],["Buk","SOLA","reactivar",0.12,0.0,"Low",562,131.0,29280,"Sin señales adicionales más allá del tier de riesgo."],["Treinta","NOLA","estandarizar",0.12,11.2,"Low",622,16.0,24000,"Sin señales adicionales más allá del tier de riesgo."],["Tipti","SOLA","reactivar",0.1,0.0,"Low",44,21.0,25920,"Al tope de cupo contratado (105% de eventos, hay upsell en la renovación)."],["Pravaler","BR","crecer",0.09,24.5,"High",317,13.0,11664,"Sin señales adicionales más allá del tier de riesgo."],["Trela","BR","reactivar",0.09,0.0,"High",13,null,27000,"Sin señales adicionales más allá del tier de riesgo."],["Consubanco","NOLA","expandir",0.09,15.2,"Low",256,19.0,10000,"Sin señales adicionales más allá del tier de riesgo."],["Banza","SOLA","reactivar",0.09,0.0,"Critical",44,2.0,15800,"Sin señales adicionales más allá del tier de riesgo."],["Matrix Energia","BR","estandarizar",0.09,12.3,"Critical",197,8.0,24000,"Sin señales adicionales más allá del tier de riesgo."],["BN Americas","SOLA","reactivar",0.08,0.0,"Critical",44,3.0,16000,"Sin señales adicionales más allá del tier de riesgo."],["Pash","NOLA","revision",0.08,54.8,"Low",136,22.0,24000,"Sin señales adicionales más allá del tier de riesgo."],["Bitfinex, Inc.","SOLA","revision",0.07,43.6,"Medium",228,15.0,19000,"Sin señales adicionales más allá del tier de riesgo."],["ClearSale","BR","reactivar",0.06,0.0,"Low",-17,5.0,10400,"Sin señales adicionales más allá del tier de riesgo."],["Rocket.la","NOLA","reactivar",0.04,0.0,"Critical",13,1.0,10000,"Sin señales adicionales más allá del tier de riesgo."],["RespondeAI","BR","reactivar",0.04,0.0,"High",348,7.0,null,"Sin señales adicionales más allá del tier de riesgo."],["Vitat","BR","estandarizar",0.02,3.8,"High",136,20.0,21600,"Sin señales adicionales más allá del tier de riesgo."],["Farmatodo","NOLA","estandarizar",0.01,6.9,"High",409,68.0,107000,"Sin señales adicionales más allá del tier de riesgo."]];
+const BD=[["Banco General","MAU",102.3,1249.7,"2.0M","2.0M","46K","Sobreconsume en 3 features distintos — vale una conversación de expansión integral, no feature por feature. Motor de cartera (2.68% del MARR). Excede el cupo en 46K MAU · pacing 1250% (proyección a este ritmo) · contrato vence 11/17/2026."],["Cencosud","MAU",466.8,2366.6,"1.8M","8.4M","6.6M","Atención por proceso (0.32% del MARR). Excede el cupo en 6.6M MAU · pacing 2367% (proyección a este ritmo) · contrato vence 10/31/2026."],["Claro Pay","MAU",103.5,1254.7,"1.6M","1.7M","55K","Candidata a upsell (0.74% del MARR). Excede el cupo en 55K MAU · pacing 1255% (proyección a este ritmo) · contrato vence 10/22/2026."],["Puntos Colombia","MAU",149.7,886.7,"750K","1.1M","373K","Motor de cartera (1.02% del MARR). Ojo: el allotment de esta fila parece tener un error de carga (750 en vez de 750,000) — validar antes de usar el número exacto en el deck. Excede el cupo en 373K MAU · pacing 887% (proyección a este ritmo) · contrato vence 01/31/2027."],["Banco General","MUV",117.7,968.1,"500","588","88","Sobreconsume en 3 features distintos — vale una conversación de expansión integral, no feature por feature. Motor de cartera (2.68% del MARR). Excede el cupo en 88 MUV · pacing 968% (proyección a este ritmo) · contrato vence 11/17/2026."],["Casa de Tono","MUV",123.5,696.3,"200","247","47","Atención por proceso (0.29% del MARR). Excede el cupo en 47 MUV · pacing 696% (proyección a este ritmo) · contrato vence 05/26/2026."],["Draftea","mensajes WhatsApp",110.6,56.4,"11.5M","12.7M","1.2M","Sobreconsume en 2 features distintos — vale una conversación de expansión integral, no feature por feature. Atención por proceso (0.59% del MARR). Excede el cupo en 1.2M mensajes WhatsApp · pacing 56% (proyección a este ritmo) · contrato vence 08/09/2026."],["Ueno","mensajes WhatsApp",102.1,101.4,"2.8M","2.9M","58K","Sin match en la cartera de servicio (producto separado). Excede el cupo en 58K mensajes WhatsApp · pacing 101% (proyección a este ritmo) · contrato vence 11/20/2026."],["Banco General","datapoints",137.8,167.4,"30.0B","41.3B","11.3B","Sobreconsume en 3 features distintos — vale una conversación de expansión integral, no feature por feature. Motor de cartera (2.68% del MARR). Excede el cupo en 11.3B datapoints · pacing 167% (proyección a este ritmo) · contrato vence 11/17/2026."],["Draftea","emails",192.2,-31.9,"1.5M","2.9M","1.4M","Sobreconsume en 2 features distintos — vale una conversación de expansión integral, no feature por feature. Atención por proceso (0.59% del MARR). Excede el cupo en 1.4M emails · pacing -32% (el ritmo de consumo viene bajando) · contrato vence 08/09/2026."]];
+const RN={C:"Critical",H:"High",M:"Medium",L:"Low"};
+const RC={C:"var(--coral-d)",H:"var(--pink-d)",M:"var(--coral-d)",L:"var(--mint-d)"};
+const col=d=>d[2]>=0.01?2:(d[2]>=0.003?1:0);
+const row=d=>{if(d[9]==="kof")return 0;if(d[8]>=0.2)return 0;if(d[8]<0.05)return d[2]>=0.01?1:2;return 1;};
+const CELLS=[
+ [{t:"Intervenir",e:"EXCEDIDA · APORTE BAJO",c:"var(--m-coral)",tc:"var(--coral-d)"},{t:"Intervenir con cuidado",e:"EXCEDIDA · APORTE MEDIO",c:"var(--m-coral)",tc:"var(--coral-d)"},{t:"Task force",e:"EXCEDIDA · APORTE ALTO",c:"var(--m-coral)",tc:"var(--coral-d)"}],
+ [{t:"Mantener",e:"EN LÍNEA · APORTE BAJO",c:"var(--m-mint)",tc:"var(--mint-d)"},{t:"Expandir",e:"EN LÍNEA · APORTE MEDIO",c:"var(--m-mint)",tc:"var(--mint-d)"},{t:"Proteger",e:"EN LÍNEA · APORTE ALTO",c:"var(--m-mint)",tc:"var(--mint-d)"}],
+ [{t:"Automatizar",e:"SIN DEDICACIÓN · BAJO",c:"var(--m-lavender)",tc:"var(--lav-d)"},{t:"Despertar 1a1",e:"SIN DEDICACIÓN · MEDIO",c:"var(--m-lavender)",tc:"var(--lav-d)"},{t:"Vacía",e:"SIN DEDICACIÓN · ALTO",c:"#d3d1c7",tc:"var(--b50)"}]];
+const DISC={
+ 3:(n)=>"Sanas chicas ("+n+"): reciben horas razonables y pagan bien. Acción: mantener por proceso — playbooks, no tocar.",
+ 4:(n)=>"Sanas medianas ("+n+"): la relación está activa y rinde. Acción: expandir — acá va el esfuerzo de upsell porque ya hay vínculo vivo (Ridery, Bold, Mevo...).",
+ 6:(n)=>"Dormidas chicas ("+n+"): casi sin atención y aportan poco. Acción: automatizar — contacto por proceso, self-service, costo mínimo.",
+ 7:(n,p)=>"Dormidas medianas ("+n+(p?", "+p+" del MARR":"")+"): pagan y no reciben nada. Acción: despertar 1 a 1 — health check con nombre propio esta semana (Kavak, Stori, Will Bank, Rappi, Claro Pay...)."
+};
+const pf=(x,dec)=>(x*100).toFixed(dec===undefined?1:dec)+"%";
+const fmt=n=>"$"+Math.round(n).toLocaleString("en-US");
+let terr="all", tier=0, selCell=null;
+const vis=()=>D.filter(d=>(terr==="all"||d[1]===terr)&&(tier===0||d[15]===tier));
+function stats(){
+const V=vis(), tm=V.reduce((s,d)=>s+d[2],0), th=V.reduce((s,d)=>s+d[3],0);
+const c=V.reduce((s,d)=>s+d[6],0), m=V.reduce((s,d)=>s+d[7],0);
+const corr=V.filter(d=>CORR.includes(d[9])), rea=V.filter(d=>d[9]==="reactivar");
+const sano=tm>0?1-corr.reduce((s,d)=>s+d[2],0)/tm:0;
+document.getElementById("nchip").textContent=V.length+" cuentas";
+document.getElementById("stats").innerHTML=
+'<div class="stat-card"><div class="stat">'+(m>0?pf(c/m):"—")+'</div><div class="stat-label">costo de horas sobre el margen del bimestre'+(terr==="all"?" — nivel compañía":" en "+terr)+'</div></div>'
++'<div class="stat-card"><div class="stat" style="color:var(--mint-d)">'+pf(sano,0)+'</div><div class="stat-label">del MARR'+(terr==="all"?"":" de "+terr)+' está sano: bien atendido y bien cobrado</div></div>'
++'<div class="stat-card"><div class="stat" style="color:var(--coral-d)">'+corr.length+'</div><div class="stat-label">cuentas con acción correctiva asignada ('+pf(corr.reduce((s,d)=>s+d[3],0)/(th||1),0)+' de las horas)</div></div>'
++'<div class="stat-card"><div class="stat" style="color:var(--lav-d)">'+rea.length+'</div><div class="stat-label">cuentas a reactivar: '+pf(rea.reduce((s,d)=>s+d[2],0)/(tm||1))+' del MARR sin contacto en 2 meses</div></div>';
+}
+function nine(){
+const V=vis(), tm=V.reduce((s,d)=>s+d[2],0)||1, th=V.reduce((s,d)=>s+d[3],0)||1;
+let h="";
+[0,1,2].forEach(r=>[0,1,2].forEach(cI=>{
+const meta=CELLS[r][cI], arr=V.filter(d=>row(d)===r&&col(d)===cI);
+const mm=arr.reduce((s,d)=>s+d[2],0), hh=arr.reduce((s,d)=>s+d[3],0);
+const groups={}; arr.forEach(d=>groups[d[9]]=(groups[d[9]]||0)+1);
+const gtxt=Object.keys(groups).map(k=>G[k]+" ("+groups[k]+")").join(" · ");
+const chips=arr.slice().sort((a,b)=>b[2]-a[2]).map(d=>'<span class="cchip" data-i="'+D.indexOf(d)+'">'+d[0]+'</span>').join(" ");
+const dKey=r*3+cI, disc=DISC[dKey]?DISC[dKey](arr.length,arr.length?pf(mm/tm,0):null):"";
+h+='<div class="cell'+(selCell===r*3+cI?" sel":"")+'" style="border-top-color:'+meta.c+'" data-cell="'+(r*3+cI)+'" role="button" tabindex="0">'
++'<div class="ce" style="color:'+meta.tc+'">'+meta.e+'</div>'
++'<div style="display:flex;align-items:baseline;gap:10px;margin-top:6px"><span class="cn">'+arr.length+'</span><span class="ct" style="color:'+meta.tc+'">'+meta.t+'</span></div>'
++(disc?'<div class="cdisc">'+disc+'</div>':(gtxt?'<div style="font-size:10.5px;opacity:.6;margin-top:3px;line-height:1.4">'+gtxt+'</div>':''))
++(chips?'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px">'+chips+'</div>':'')
++'<div class="cs">'+(arr.length?pf(mm/tm)+" MARR · "+pf(hh/th)+" horas":(r===2&&cI===2?"Ninguna cuenta core desatendida":"—"))+'</div></div>';
+}));
+document.getElementById("nine").innerHTML=h;
+document.querySelectorAll(".cell").forEach(b=>b.addEventListener("click",()=>{selCell=+b.dataset.cell;nine();cellDetail();}));
+document.querySelectorAll(".cell .cchip").forEach(c=>c.addEventListener("click",e=>{e.stopPropagation();const d=D[+c.dataset.i];selCell=row(d)*3+col(d);nine();cellDetail();ficha(d);document.getElementById("detail").scrollIntoView({behavior:"smooth",block:"nearest"});}));
+}
+function cellDetail(){
+if(selCell===null)return;
+const r=Math.floor(selCell/3), cI=selCell%3, meta=CELLS[r][cI];
+const V=vis(), tm=V.reduce((s,d)=>s+d[2],0)||1;
+const arr=V.filter(d=>row(d)===r&&col(d)===cI).sort((a,b)=>b[2]-a[2]);
+let h='<div class="dhead"><div><span class="eyebrow" style="color:'+meta.tc+'">'+meta.e+'</span><div class="h3" style="font-size:clamp(17px,2vw,21px)">'+meta.t+' — '+arr.length+' cuentas</div></div></div>';
+if(!arr.length){h+='<div style="font-size:13px;opacity:.5;margin-top:10px">'+(r===2&&cI===2?"Ninguna cuenta con aporte alto está sin dedicación. Buena señal.":"Sin cuentas en esta celda con el filtro actual.")+'</div>';}
+else{h+='<div class="dchips">'+arr.map(d=>'<button class="acc" data-i="'+D.indexOf(d)+'">'+d[0]+' · '+pf(d[2]/tm)+'</button>').join("")+'</div>';}
+h+='<div class="ficha" id="ficha"></div>';
+document.getElementById("detail").innerHTML=h;
+document.querySelectorAll(".acc").forEach(b=>b.addEventListener("click",()=>ficha(D[+b.dataset.i])));
+}
+function ficha(d){
+const V=vis(), tm=V.reduce((s,d)=>s+d[2],0)||1, th=V.reduce((s,d)=>s+d[3],0)||1;
+const f=document.getElementById("ficha"); f.style.display="block";
+f.innerHTML='<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><span class="h3">'+d[0]+'</span><span class="chip" style="font-size:10px;padding:3px 10px">'+d[1]+'</span><span class="chip" style="font-size:10px;padding:3px 10px">'+G[d[9]]+'</span></div>'
++'<div class="frow"><span>MARR del período: <b>'+fmt(d[7])+'</b></span><span>costo de horas: <b>'+fmt(d[6])+'</b></span><span>ratio: <b>'+(d[8]>=9?"n/d":pf(d[8],0))+'</b></span></div>'
++'<div class="frow"><span>horas abril: <b>'+d[4]+'</b></span><span>horas mayo: <b>'+d[5]+'</b></span><span>aporte'+(terr==="all"?" total":" en "+terr)+': <b>'+pf(d[2]/tm)+' MARR · '+pf(d[3]/th)+' horas</b></span></div>'
++'<div style="margin-top:8px;font-size:12px;opacity:.6">'+ACC[d[9]]+'</div>';
+}
+function plan(){
+const V=vis();
+const corr=V.filter(d=>CORR.includes(d[9])).sort((a,b)=>CORR.indexOf(a[9])-CORR.indexOf(b[9]));
+const rea=V.filter(d=>d[9]==="reactivar"&&d[2]>=0.003).sort((a,b)=>b[2]-a[2]);
+const dot={corregir:"var(--m-coral)",repricing:"var(--m-coral)",renegociar:"var(--m-coral)",monitoreo:"var(--m-pink)",warning:"var(--m-pink)",revision:"#d3d1c7"};
+let a='<div class="plan-card"><div class="eyebrow" style="color:var(--coral-d);font-weight:700">CORRECTIVAS ('+corr.length+')</div>';
+a+=corr.map(d=>'<div class="plan-item"><span class="dot" style="background:'+dot[d[9]]+'"></span><span><b>'+d[0]+'</b> — '+ACC[d[9]].toLowerCase()+'</span></div>').join("")||'<div style="font-size:12px;opacity:.5;margin-top:8px">Sin correctivas en esta región.</div>';
+a+='</div>';
+let b='<div class="plan-card"><div class="eyebrow" style="color:var(--lav-d);font-weight:700">REACTIVAR PRIORITARIO ('+rea.length+')</div>';
+b+=rea.map(d=>'<div class="plan-item"><span class="dot" style="background:var(--m-lavender)"></span><span><b>'+d[0]+'</b> — contacto esta semana ('+pf(d[2])+' del MARR total)</span></div>').join("")||'<div style="font-size:12px;opacity:.5;margin-top:8px">Sin reactivaciones prioritarias en esta región.</div>';
+b+='</div>';
+document.getElementById("plan").innerHTML=a+b;
+}
+function hxp(c){return parseInt(c,16);}
+function lerpc(a,b,t){const A=[hxp(a.slice(1,3)),hxp(a.slice(3,5)),hxp(a.slice(5,7))],B=[hxp(b.slice(1,3)),hxp(b.slice(3,5)),hxp(b.slice(5,7))];return '#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('');}
+function semaf(r){if(r<0)return '#888780';if(r>=0.5)return '#E24B4A';if(r>=0.2)return lerpc('#F5C842','#E06D10',(r-0.2)/0.3);if(r>=0.05)return lerpc('#0F6E56','#97C459',(r-0.05)/0.14);return '#378ADD';}
+function bubble(){
+const TOTM=8932404;
+const V=vis().filter(d=>(d[4]+d[5])>0&&d[7]>0);
+const W=1100,Hh=520,Lm=70,Rm=20,Tm=20,Bm=52,PW=W-Lm-Rm,PH=Hh-Tm-Bm,MX=1150,MY=110000;
+const xf=v=>Lm+Math.sqrt(v/MX)*PW, yf=v=>Tm+(1-Math.sqrt(Math.min(v,MY)/MY))*PH;
+let s='<svg width="100%" viewBox="0 0 '+W+' '+Hh+'">';
+[0,10,50,100,250,500,1000].forEach(v=>{s+='<line x1="'+xf(v)+'" x2="'+xf(v)+'" y1="'+Tm+'" y2="'+(Tm+PH)+'" stroke="var(--b10)" stroke-width="1"/><text x="'+xf(v)+'" y="'+(Tm+PH+16)+'" text-anchor="middle" font-size="10" fill="var(--b50)">'+v+'</text>';});
+[0,2000,10000,25000,50000,100000].forEach(v=>{s+='<line x1="'+Lm+'" x2="'+(W-Rm)+'" y1="'+yf(v)+'" y2="'+yf(v)+'" stroke="var(--b10)" stroke-width="1"/><text x="'+(Lm-8)+'" y="'+(yf(v)+3)+'" text-anchor="end" font-size="10" fill="var(--b50)">'+(v>=1000?(v/1000)+'k':v)+'</text>';});
+[[0.2,"ratio 20%"],[0.5,"ratio 50%"]].forEach(([r,lb])=>{let pts=[];for(let x=1;x<=MX;x*=1.25){const m=18.62*x/r;if(m>MY)break;pts.push(xf(x).toFixed(1)+','+yf(m).toFixed(1));}
+if(pts.length<2)return;
+s+='<polyline points="'+pts.join(' ')+'" fill="none" stroke="var(--b50)" stroke-width="1" stroke-dasharray="'+(r===0.2?'6 4':'2 3')+'"/>';
+const lp=pts[pts.length-1].split(',');s+='<text x="'+lp[0]+'" y="'+(+lp[1]-6)+'" text-anchor="end" font-size="10" fill="var(--b50)">'+lb+'</text>';});
+V.slice().sort((a,b)=>b[2]-a[2]).forEach(d=>{const hs=d[4]+d[5],c=semaf(d[9]==="kof"?-1:d[8]),rr=Math.max(3,0.0295*Math.sqrt(d[2]*TOTM));
+s+='<circle cx="'+xf(hs).toFixed(1)+'" cy="'+yf(d[7]).toFixed(1)+'" r="'+rr.toFixed(1)+'" fill="'+c+'" fill-opacity="0.65" stroke="'+c+'" stroke-width="0.8" style="cursor:pointer" data-i="'+D.indexOf(d)+'"></circle>';});
+s+='<text x="'+(Lm+PW/2)+'" y="'+(Hh-8)+'" text-anchor="middle" font-size="12" fill="var(--b70)">Horas entregadas A+M (escala raíz)</text>';
+s+='<text transform="translate(18,'+(Tm+PH/2)+') rotate(-90)" text-anchor="middle" font-size="12" fill="var(--b70)">MARR del bimestre USD (escala raíz)</text>';
+document.getElementById("bubble").innerHTML=s+'</svg>';
+const tip=document.getElementById("bubtip");
+document.querySelectorAll("#bubble circle").forEach(c=>{
+c.addEventListener("mouseenter",()=>{const d=D[+c.dataset.i];
+tip.innerHTML='<b>'+d[0]+'</b><br>Tier '+d[15]+' · MARR anual: '+fmt(d[2]*TOTM)+'<br>Costo/MARR A+M: '+(d[9]==="kof"?"n/a (equipo dedicado)":(d[8]*100).toFixed(2)+"%");
+tip.style.display="block";});
+c.addEventListener("mousemove",e=>{const vw=window.innerWidth,vh=window.innerHeight,tw=tip.offsetWidth||180,th=tip.offsetHeight||50;
+let lx=e.clientX+16,ty=e.clientY+16;if(lx+tw>vw-8)lx=e.clientX-tw-16;if(ty+th>vh-8)ty=e.clientY-th-16;
+tip.style.left=lx+"px";tip.style.top=ty+"px";});
+c.addEventListener("mouseleave",()=>{tip.style.display="none";});
+c.addEventListener("click",()=>{const d=D[+c.dataset.i];selCell=row(d)*3+col(d);nine();cellDetail();ficha(d);document.getElementById("detail").scrollIntoView({behavior:"smooth",block:"nearest"});});
+});
+}
+const HRC={Low:"#0F6E56",Medium:"#E0A020",High:"#E06D10",Critical:"#E24B4A"};
+function hxTip(e,html){const tip=document.getElementById("bubtip");tip.innerHTML=html;tip.style.display="block";
+const vw=window.innerWidth,vh=window.innerHeight,tw=tip.offsetWidth||260,th=tip.offsetHeight||110;
+let lx=e.clientX+16,ty=e.clientY+16;if(lx+tw>vw-8)lx=e.clientX-tw-16;if(ty+th>vh-8)ty=e.clientY-th-16;
+tip.style.left=lx+"px";tip.style.top=ty+"px";}
+function hxHide(){document.getElementById("bubtip").style.display="none";}
+function hstats(){
+const tm=HD.reduce((s,d)=>s+d[3],0);
+const ch=HD.filter(d=>d[5]==="Critical"||d[5]==="High");
+const soon=HD.filter(d=>d[6]<90);
+const zombie=HD.filter(d=>d[7]!=null&&d[7]<5&&d[3]>0.1);
+document.getElementById("hstats").innerHTML=
+'<div class="stat-card"><div class="stat" style="color:var(--coral-d)">'+pf(ch.reduce((s,d)=>s+d[3],0)/100,0)+'</div><div class="stat-label">del MARR con riesgo Critical o High de no renovar Amplitude</div></div>'
++'<div class="stat-card"><div class="stat">'+soon.length+'</div><div class="stat-label">cuentas renuevan en los próximos 90 días ('+pf(soon.reduce((s,d)=>s+d[3],0)/100,0)+' del MARR)</div></div>'
++'<div class="stat-card"><div class="stat" style="color:var(--lav-d)">'+zombie.length+'</div><div class="stat-label">cuentas zombie: pagan bien, casi no usan el producto</div></div>'
++'<div class="stat-card"><div class="stat" style="color:var(--mint-d)">'+BD.length+'</div><div class="stat-label">cuentas con sobreconsumo Braze — pipeline de upsell sin fricción</div></div>';
+}
+function hscatter(){
+const W=1100,Hh=420,Lm=60,Rm=20,Tm=16,Bm=40,PW=W-Lm-Rm,PH=Hh-Tm-Bm,maxMau=1550,maxPct=8;
+const xf=v=>Lm+Math.sqrt(v/maxMau)*PW, yf=v=>Tm+(1-Math.sqrt(Math.min(v,maxPct)/maxPct))*PH;
+let s='<svg width="100%" viewBox="0 0 '+W+' '+Hh+'">';
+[0,5,25,100,500,1500].forEach(v=>{s+='<line x1="'+xf(v)+'" x2="'+xf(v)+'" y1="'+Tm+'" y2="'+(Tm+PH)+'" stroke="var(--b10)" stroke-width="1"/><text x="'+xf(v)+'" y="'+(Tm+PH+16)+'" text-anchor="middle" font-size="10" fill="var(--b50)">'+v+'</text>';});
+[0,0.5,1,2,4,8].forEach(v=>{s+='<line x1="'+Lm+'" x2="'+(W-Rm)+'" y1="'+yf(v)+'" y2="'+yf(v)+'" stroke="var(--b10)" stroke-width="1"/><text x="'+(Lm-8)+'" y="'+(yf(v)+3)+'" text-anchor="end" font-size="10" fill="var(--b50)">'+v+'%</text>';});
+HD.forEach((d,i)=>{const mau=d[7]==null?0:d[7],rr=Math.max(3.5,Math.min(24,3+21*Math.sqrt((d[8]||0)/2749468)));
+s+='<circle cx="'+xf(mau).toFixed(1)+'" cy="'+yf(d[3]).toFixed(1)+'" r="'+rr.toFixed(1)+'" fill="'+HRC[d[5]]+'" fill-opacity="0.62" stroke="'+HRC[d[5]]+'" stroke-width="0.8" style="cursor:pointer" data-i="'+i+'"></circle>';});
+s+='<text x="'+(Lm+PW/2)+'" y="'+(Hh-6)+'" text-anchor="middle" font-size="12" fill="var(--b70)">Adopción — MAU (escala raíz)</text>';
+s+='<text transform="translate(16,'+(Tm+PH/2)+') rotate(-90)" text-anchor="middle" font-size="12" fill="var(--b70)">% del MARR</text>';
+document.getElementById("hscatter").innerHTML=s+'</svg>';
+document.querySelectorAll("#hscatter circle").forEach(c=>{
+c.addEventListener("mouseenter",e=>{const d=HD[+c.dataset.i];
+hxTip(e,'<b>'+d[0]+'</b> <span style="opacity:.5">· '+d[1]+'</span><br><span style="color:'+HRC[d[5]]+';font-weight:700">'+d[5]+' risk</span><br>'+d[9]+'<br><span style="opacity:.6;font-size:10.5px">'+d[3]+'% del MARR · ratio costo '+d[4]+'% · '+(d[7]==null?"MAU n/d":d[7]+" MAU")+' · renueva en '+d[6]+' días · ARR Amplitude '+(d[8]==null?"n/d":fmt(d[8]))+'</span>');});
+c.addEventListener("mousemove",e=>hxTip(e,document.getElementById("bubtip").innerHTML));
+c.addEventListener("mouseleave",hxHide);
+});
+}
+function htimeline(){
+const W=1100,Hh=280,Lm=110,Rm=20,Tm=14,Bm=34,PW=W-Lm-Rm,PH=Hh-Tm-Bm,maxD=1020;
+const xf=v=>Lm+Math.sqrt(Math.max(v,0)/maxD)*PW;
+const lanes={Critical:0,High:1,Medium:2,Low:3};
+const laneY=r=>Tm+(r+0.5)*(PH/4);
+let s='<svg width="100%" viewBox="0 0 '+W+' '+Hh+'">';
+s+='<rect x="'+Lm+'" y="'+Tm+'" width="'+(xf(30)-Lm)+'" height="'+PH+'" fill="#E24B4A" opacity="0.08"/>';
+s+='<rect x="'+xf(30)+'" y="'+Tm+'" width="'+(xf(90)-xf(30))+'" height="'+PH+'" fill="#E0A020" opacity="0.1"/>';
+[0,1,2,3].forEach(r=>{s+='<line x1="'+Lm+'" x2="'+(W-Rm)+'" y1="'+laneY(r)+'" y2="'+laneY(r)+'" stroke="var(--b10)" stroke-width="0.5"/>';});
+Object.keys(lanes).forEach(k=>{s+='<text x="4" y="'+(laneY(lanes[k])+4)+'" font-size="11" fill="'+HRC[k]+'" font-weight="700">'+k+'</text>';});
+[0,30,90,180,365,1020].forEach(v=>{s+='<text x="'+xf(v)+'" y="'+(Hh-6)+'" text-anchor="middle" font-size="10" fill="var(--b50)">'+(v===1020?"1000+":v)+'</text>';});
+const jitter=[0.18,0.82,0.35,0.65,0.5,0.1,0.9,0.28,0.72];
+const perLane={};
+HD.forEach((d,i)=>{const r=lanes[d[5]];perLane[r]=(perLane[r]||0)+1;
+const jy=laneY(r)+(jitter[perLane[r]%jitter.length]-0.5)*(PH/4-14);
+const rr=Math.max(3.5,Math.min(20,3+18*Math.sqrt((d[8]||0)/2749468)));
+s+='<circle cx="'+xf(d[6]).toFixed(1)+'" cy="'+jy.toFixed(1)+'" r="'+rr.toFixed(1)+'" fill="'+HRC[d[5]]+'" fill-opacity="0.62" stroke="'+HRC[d[5]]+'" stroke-width="0.8" style="cursor:pointer" data-i="'+i+'"></circle>';});
+s+='<text x="'+(Lm+PW/2)+'" y="'+Hh+'" text-anchor="middle" font-size="12" fill="var(--b70)">Días a renovación (escala raíz)</text>';
+document.getElementById("htimeline").innerHTML=s+'</svg>';
+document.querySelectorAll("#htimeline circle").forEach(c=>{
+c.addEventListener("mouseenter",e=>{const d=HD[+c.dataset.i];
+hxTip(e,'<b>'+d[0]+'</b> <span style="opacity:.5">· '+d[1]+'</span><br><span style="color:'+HRC[d[5]]+';font-weight:700">'+d[5]+' risk</span><br>'+d[9]+'<br><span style="opacity:.6;font-size:10.5px">renueva en '+d[6]+' días · '+(d[7]==null?"MAU n/d":d[7]+" MAU")+' · ARR Amplitude '+(d[8]==null?"n/d":fmt(d[8]))+'</span>');});
+c.addEventListener("mousemove",e=>hxTip(e,document.getElementById("bubtip").innerHTML));
+c.addEventListener("mouseleave",hxHide);
+});
+}
+function hbars(){
+const rows=BD.slice().sort((a,b)=>b[2]-a[2]);
+const W=1100,rowH=36,pad=8,Lm=190,Rm=60,Tm=6,PW=W-Lm-Rm,maxV=500;
+const Hh=Tm+rows.length*rowH+26;
+const xf=v=>Lm+Math.min(v,maxV)/maxV*PW;
+let s='<svg width="100%" viewBox="0 0 '+W+' '+Hh+'">';
+s+='<line x1="'+xf(100)+'" x2="'+xf(100)+'" y1="'+Tm+'" y2="'+(Tm+rows.length*rowH)+'" stroke="var(--b50)" stroke-width="1" stroke-dasharray="3 3"/>';
+s+='<text x="'+xf(100)+'" y="'+(Tm+rows.length*rowH+16)+'" text-anchor="middle" font-size="10" fill="var(--b50)">100% (cupo)</text>';
+rows.forEach((d,i)=>{const y=Tm+i*rowH+pad/2,bh=rowH-pad;
+s+='<text x="'+(Lm-8)+'" y="'+(y+bh/2+3)+'" text-anchor="end" font-size="11.5" fill="var(--b70)">'+d[0]+'</text>';
+s+='<text x="'+(Lm-8)+'" y="'+(y+bh/2+15)+'" text-anchor="end" font-size="9.5" fill="var(--b50)">'+d[1]+'</text>';
+s+='<rect x="'+Lm+'" y="'+y+'" width="'+PW+'" height="'+bh+'" rx="4" fill="var(--b05)"></rect>';
+s+='<rect x="'+Lm+'" y="'+y+'" width="'+(xf(d[2])-Lm).toFixed(1)+'" height="'+bh+'" rx="4" fill="var(--mint-d)" style="cursor:pointer" data-i="'+BD.indexOf(d)+'"></rect>';
+s+='<text x="'+(xf(d[2])+6)+'" y="'+(y+bh/2+4)+'" font-size="11" font-weight="700" fill="var(--b70)">'+d[2]+'%</text>';});
+document.getElementById("hbars").innerHTML=s+'</svg>';
+document.querySelectorAll("#hbars rect[data-i]").forEach(r=>{
+r.addEventListener("mouseenter",e=>{const d=BD[+r.dataset.i];
+hxTip(e,'<b>'+d[0]+'</b> <span style="opacity:.5">· '+d[1]+'</span><br><span style="color:var(--mint-d);font-weight:700">'+d[2]+'% del cupo contratado</span><br>'+d[7]+'<br><span style="opacity:.6;font-size:10.5px">Contratado: '+d[4]+' · Uso real: '+d[5]+'</span>');});
+r.addEventListener("mousemove",e=>hxTip(e,document.getElementById("bubtip").innerHTML));
+r.addEventListener("mouseleave",hxHide);
+});
+}
+function renderAll(){stats();nine();bubble();plan();if(selCell!==null)cellDetail();}
+document.querySelectorAll(".fchip:not(.tchip)").forEach(b=>b.addEventListener("click",()=>{
+document.querySelectorAll(".fchip:not(.tchip)").forEach(x=>x.classList.remove("on"));b.classList.add("on");
+terr=b.dataset.t;renderAll();
+}));
+document.querySelectorAll(".tchip").forEach(b=>b.addEventListener("click",()=>{
+document.querySelectorAll(".tchip").forEach(x=>x.classList.remove("on"));b.classList.add("on");
+tier=+b.dataset.tier;renderAll();
+}));
+renderAll();
+hstats();hscatter();htimeline();hbars();
+</script>
+</body>
+</html>
+ 
+
